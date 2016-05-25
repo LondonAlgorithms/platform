@@ -1,0 +1,4 @@
+*.swp
+*.gz
+*.rvmrc
+.DS_Store
