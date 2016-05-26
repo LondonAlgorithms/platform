@@ -1,4 +1,6 @@
 *.swp
+builds/
+uploads/
 *.gz
 *.rvmrc
 .DS_Store

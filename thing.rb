@@ -22,7 +22,8 @@ post "/upload" do
   FileUtils.cp("Dockerfile", build_run +  "/" + "Dockerfile")
 
   output = create_image(build_run)
-  output = output.split('\n')
+  output = output.split("\n")
+  output.reject! { |s| s.empty? }
   return {text: output}.to_json
 end
 
