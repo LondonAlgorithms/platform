@@ -34,7 +34,6 @@ def create_image(folder)
 
   output = []
 
-  #container.tap(&:start).attach { |stream, chunk| output << {stream:stream, chunk:chunk.to_s.force_encoding("UTF-8")} }
   container.tap(&:start).attach { |stream, chunk| output << {stream:stream, chunk:chunk.to_s} }
   s = ""
   output.each { |entry| s = s + entry[:chunk] }
