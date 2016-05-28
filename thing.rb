@@ -5,6 +5,7 @@ require 'pry'
 require 'haml'
 require 'json'
 
+set :bind, '0.0.0.0'
 get "/upload" do
   haml :upload
 end

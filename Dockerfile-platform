@@ -1,0 +1,9 @@
+FROM ruby:latest
+
+WORKDIR /usr/platform
+ADD thing.rb /usr/platform
+ADD Gemfile /usr/platform
+ADD Gemfile.lock /usr/platform
+
+RUN bundle install
+EXPOSE 4567
