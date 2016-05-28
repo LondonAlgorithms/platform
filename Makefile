@@ -1,6 +1,3 @@
-builddocker:
-		docker build -t greedy:latest -f Dockerfile-build .
-
 buildplatform:
 	docker build -t platform:latest -f Dockerfile-platform .
 startplatform:
