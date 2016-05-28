@@ -1,9 +1,14 @@
 FROM ruby:latest
 
 WORKDIR /usr/platform
-ADD thing.rb /usr/platform
 ADD Gemfile /usr/platform
 ADD Gemfile.lock /usr/platform
-
 RUN bundle install
+
+ADD views/ /usr/platform/views
+ADD thing.rb /usr/platform
+RUN mkdir /usr/platform/uploads
+RUN mkdir /usr/platform/builds
+ADD Dockerfile /usr/platform
+
 EXPOSE 4567
