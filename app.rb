@@ -9,15 +9,13 @@ require "json"
 set :bind, "0.0.0.0"
 INTEGRITY_APP_URL = "http://localhost:4444/"
 
-get "/upload" do
-  haml :upload
+get "/pathfinding" do
+  erb :pathfinding
 end
 
 post "/upload" do
-  content_type :json
-
   problem = params["problem"] || "greedy"
-  language = params["language"] || "javascript"
+  language = params["language"].downcase || "javascript"
   docker_image = problem + "-" + language
   build_run = "builds/" + docker_image + "-" + SecureRandom.hex
   Dir.mkdir(build_run)
@@ -39,7 +37,8 @@ post "/upload" do
   end
 
   output = create_image(build_run).split("\n").reject(&:empty?)
-  return {text: output}.to_json
+  #return {text: output}.to_json
+  erb :output, :locals => {"output": output}
 end
 
 def request_url(url)
