@@ -11,3 +11,5 @@ RUN mkdir /usr/platform/uploads
 RUN mkdir /usr/platform/builds
 
 EXPOSE 4567
+
+CMD ["ruby", "app.rb"]
