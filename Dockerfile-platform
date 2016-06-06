@@ -6,7 +6,7 @@ ADD Gemfile.lock /usr/platform
 RUN bundle install
 
 ADD views/ /usr/platform/views
-ADD thing.rb /usr/platform
+ADD app.rb /usr/platform
 RUN mkdir /usr/platform/uploads
 RUN mkdir /usr/platform/builds
 ADD Dockerfile /usr/platform
