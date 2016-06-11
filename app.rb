@@ -20,24 +20,15 @@ post "/upload" do
   build_run = "builds/" + docker_image + "-" + SecureRandom.hex
   Dir.mkdir(build_run)
 
-  if language == "javascript" #-- asumme this for now
-    Dir.mkdir(build_run + "/src")
+  hash = { "javascript" => "js", "ruby" => "rb" }
 
-    File.open("#{build_run}/src/algo.js", "w") do |f|
-      f.write(params["myfile"][:tempfile].read)
-    end
+  File.open("#{build_run}/algo.#{hash[language]}", "w") do |f|
+    f.write(params["myfile"][:tempfile].read)
   end
 
-  fetch_and_create_run_dockerfile(docker_image, build_run)
-
-  # check if the base image exists
-  if !base_image_available?(docker_image)
-    # download all files and then build
-    build_base_image(docker_image, build_run)
-  end
+  fetch_spec_file_and_dockerfile(docker_image, build_run)
 
   output = create_image(build_run).split("\n").reject(&:empty?)
-  #return {text: output}.to_json
   erb :output, :locals => {"output": output}
 end
 
@@ -48,45 +39,24 @@ def request_url(url)
   res.body
 end
 
-def base_image_available?(base_image)
-  Docker::Image.exist?(base_image+":latest")
-end
-
-def build_base_image(docker_image,build_run)
+def fetch_spec_file_and_dockerfile(docker_image, build_run)
   res = request_url(INTEGRITY_APP_URL + "#{docker_image}")
   files = JSON.parse(res)
 
   Dir.mkdir(build_run+"/" + docker_image)
 
   files["files"].each do |file|
-    #need to add all files to build
     res = request_url(INTEGRITY_APP_URL + "#{file}")
-    File.open(build_run + "/" + file, "w") do |f|
+    File.open(build_run + "/" + file.split("/").last, "w") do |f|
       f.write(res)
     end
-  end
-
-  Docker::Image.build_from_dir(
-    build_run+"/"+docker_image,
-    {
-      "dockerfile" => "Dockerfile-build",
-      "t" => docker_image
-    }
-  )
-end
-
-def fetch_and_create_run_dockerfile(docker_image, build_run)
-  res = request_url(INTEGRITY_APP_URL + "#{docker_image}/Dockerfile-run")
-  File.open(build_run+"/" + "Dockerfile", "w") do |f|
-    f.write(res)
   end
 end
 
 def create_image(folder)
-  img = Docker::Image.build_from_dir(folder)
+  img = Docker::Image.build_from_dir(folder, {nocache: true})
 
-  container = Docker::Container.create("Cmd" => ["npm", "test"], "Image" => img.id)
-
+  container = Docker::Container.create("Image"=>img.id)
   output = []
 
   container.tap(&:start).attach { |stream, chunk| output << {stream:stream, chunk:chunk.to_s} }
