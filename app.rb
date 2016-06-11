@@ -63,4 +63,8 @@ def create_image(folder)
   s = ""
   output.each { |entry| s = s + entry[:chunk] }
   s.force_encoding("UTF-8")
+
+  container.delete
+  img.delete
+  s
 end
