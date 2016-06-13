@@ -15,6 +15,7 @@ end
 
 post "/submit" do
   content_type :json
+  response['Access-Control-Allow-Origin'] = "*"
 
   params = JSON.parse(request.body.read)
   output = ImageRunnerService.new(params).run
