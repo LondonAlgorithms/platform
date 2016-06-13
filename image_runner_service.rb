@@ -54,7 +54,7 @@ class ImageRunnerService
   attr_reader :problem, :language, :text, :docker_image, :build_run
 
   def cleanup_build_run_dir
-    #FileUtils.remove_dir(build_run)
+    FileUtils.remove_dir(build_run)
   end
 
   def create_build_run
