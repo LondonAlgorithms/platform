@@ -14,13 +14,39 @@ class ImageRunnerService
 
     @docker_image = problem + "-" + language
 
+    before = Time.now
     create_build_run
+    after = Time.now
+
+    puts "#{after-before} - create build run"
+
+    before = Time.now
     create_algo_file(build_run, language, text)
+    after = Time.now
 
+    puts "#{after-before} - create algo file"
+
+    before = Time.now
     fetch_spec_file_and_dockerfile(docker_image, build_run)
+    after = Time.now
 
-    result = create_image(build_run)
+    puts "#{after-before} - fetch spec file and docker file"
+
+    before = Time.now
+    begin
+      result = Timeout::timeout(2) { create_image(build_run) }
+    rescue Timeout::Error
+      result = "Timeout error"
+    end
+    after = Time.now
+
+    puts "#{after-before} - create image"
+
+    before = Time.now
     cleanup_build_run_dir
+    after = Time.now
+
+    puts "#{after-before} - cleanup build dir"
     result
   end
 
@@ -28,7 +54,7 @@ class ImageRunnerService
   attr_reader :problem, :language, :text, :docker_image, :build_run
 
   def cleanup_build_run_dir
-    FileUtils.remove_dir(build_run)
+    #FileUtils.remove_dir(build_run)
   end
 
   def create_build_run
