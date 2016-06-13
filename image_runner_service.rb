@@ -34,7 +34,7 @@ class ImageRunnerService
 
     before = Time.now
     begin
-      result = Timeout::timeout(2) { create_image(build_run) }
+      result = Timeout::timeout(3) { create_image(build_run) }
     rescue Timeout::Error
       result = "Timeout error"
     end
