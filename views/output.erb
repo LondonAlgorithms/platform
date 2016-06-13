@@ -2,8 +2,6 @@
     <h1>Test Output</h1>
 </div>
 
-<% output.each do |line| %>
-  <div>
-    <%= line %>
-  </div>
-<% end %>
+<pre>
+<%= output.to_s %>
+</pre>

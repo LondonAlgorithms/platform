@@ -28,7 +28,7 @@ post "/upload" do
 
   fetch_spec_file_and_dockerfile(docker_image, build_run)
 
-  output = create_image(build_run).split("\n").reject(&:empty?)
+  output = create_image(build_run)#.split("\n").reject(&:empty?)
   erb :output, :locals => {"output": output}
 end
 
