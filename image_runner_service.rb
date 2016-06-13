@@ -1,7 +1,7 @@
 require "docker-api"
 
 class ImageRunnerService
-  INTEGRITY_APP_URL = "http://localhost:4444/"
+  INTEGRITY_APP_URL = ENV["INTEGRITY_APP_URL"] || "http://localhost:4444/"
 
   def initialize(params)
     @problem = params["problem"]
