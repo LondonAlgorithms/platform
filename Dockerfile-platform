@@ -7,6 +7,7 @@ RUN bundle install
 
 ADD views/ /usr/platform/views
 ADD app.rb /usr/platform
+ADD image_runner_service.rb /usr/platform
 RUN mkdir /usr/platform/uploads
 RUN mkdir /usr/platform/builds
 
