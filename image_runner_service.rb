@@ -19,11 +19,17 @@ class ImageRunnerService
 
     fetch_spec_file_and_dockerfile(docker_image, build_run)
 
-    create_image(build_run)
+    result = create_image(build_run)
+    cleanup_build_run_dir
+    result
   end
 
   private
   attr_reader :problem, :language, :text, :docker_image, :build_run
+
+  def cleanup_build_run_dir
+    FileUtils.remove_dir(build_run)
+  end
 
   def create_build_run
     @build_run = "builds/" + docker_image + "-" + SecureRandom.hex
