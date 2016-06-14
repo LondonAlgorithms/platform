@@ -40,7 +40,7 @@ class ImageRunnerService
     end
     after = Time.now
 
-    puts "#{after-before} - create image"
+    puts "#{after-before} - ### TOTAL - create image"
 
     before = Time.now
     cleanup_build_run_dir
@@ -97,12 +97,25 @@ class ImageRunnerService
   end
 
   def create_image(folder)
-    img = Docker::Image.build_from_dir(folder, {nocache: true})
 
+    before = Time.now
+    img = Docker::Image.build_from_dir(folder)
+
+    after = Time.now
+    puts "#{after-before} - build image"
+
+    before = Time.now
     container = Docker::Container.create("Image"=>img.id)
+    after = Time.now
+    puts "#{after-before} - create container"
+
     output = []
 
+    before = Time.now
     container.tap(&:start).attach { |stream, chunk| output << {stream:stream, chunk:chunk.to_s} }
+    after = Time.now
+    puts "#{after-before} - container start"
+
     s = ""
     output.each { |entry| s = s + entry[:chunk] }
     s.force_encoding("UTF-8")
