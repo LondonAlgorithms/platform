@@ -4,4 +4,4 @@ gem 'sinatra'
 gem 'haml'
 gem 'docker-api'
 gem 'pry'
-
+gem 'puma'

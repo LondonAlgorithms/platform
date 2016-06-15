@@ -8,6 +8,7 @@ require "json"
 require './image_runner_service'
 
 set :bind, "0.0.0.0"
+configure { set :server, :puma }
 
 get "/pathfinding" do
   erb :pathfinding
