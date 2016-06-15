@@ -120,8 +120,8 @@ class ImageRunnerService
     output.each { |entry| s = s + entry[:chunk] }
     s.force_encoding("UTF-8")
 
-    container.delete
-    img.delete
+    #container.delete
+    #img.delete
     s
   end
 end
