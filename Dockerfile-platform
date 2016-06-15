@@ -15,4 +15,4 @@ RUN mkdir /usr/platform/builds
 
 EXPOSE 4567
 
-CMD ["puma", "-C puma.rb"]
+CMD ["puma", "-C", "puma.rb"]
