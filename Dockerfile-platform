@@ -13,4 +13,4 @@ RUN mkdir /usr/platform/builds
 
 EXPOSE 4567
 
-CMD ["ruby", "app.rb"]
+CMD ["puma", "-C puma.rb"]
