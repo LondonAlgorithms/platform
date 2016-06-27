@@ -5,14 +5,11 @@ ADD Gemfile /usr/platform
 ADD Gemfile.lock /usr/platform
 RUN bundle install
 
-ADD views/ /usr/platform/views
-ADD app.rb /usr/platform
-ADD puma.rb /usr/platform
+ADD app /usr/platform/app
+ADD config/ /usr/platform/config
 ADD config.ru /usr/platform
-ADD image_runner_service.rb /usr/platform
-RUN mkdir /usr/platform/uploads
 RUN mkdir /usr/platform/builds
 
 EXPOSE 4567
 
-CMD ["puma", "-C", "puma.rb"]
+CMD ["puma", "-C", "config/puma.rb"]
