@@ -33,11 +33,7 @@ class ImageRunnerService
     puts "#{after-before} - fetch spec file and docker file"
 
     before = Time.now
-    begin
-      result = Timeout::timeout(3) { create_image(build_run) }
-    rescue Timeout::Error
-      result = "Timeout error"
-    end
+    result = create_image(build_run)
     after = Time.now
 
     puts "#{after-before} - ### TOTAL - create image"
@@ -98,30 +94,26 @@ class ImageRunnerService
 
   def create_image(folder)
 
-    before = Time.now
     img = Docker::Image.build_from_dir(folder)
-
-    after = Time.now
-    puts "#{after-before} - build image"
-
-    before = Time.now
     container = Docker::Container.create("Image"=>img.id)
-    after = Time.now
-    puts "#{after-before} - create container"
 
     output = []
 
-    before = Time.now
-    container.tap(&:start).attach { |stream, chunk| output << {stream:stream, chunk:chunk.to_s} }
-    after = Time.now
-    puts "#{after-before} - container start"
+    begin
+      Timeout::timeout(3) do
+        container.tap(&:start).attach { |stream, chunk| output << {stream:stream, chunk:chunk.to_s} }
+      end
+    rescue Timeout::Error
+      output << {chunk: "Timeout error"}
+      container.stop
+    end
 
     s = ""
     output.each { |entry| s = s + entry[:chunk] }
     s.force_encoding("UTF-8")
 
-    #container.delete
-    #img.delete
+    container.delete
+    img.delete
     s
   end
 end
