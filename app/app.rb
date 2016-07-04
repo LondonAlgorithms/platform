@@ -5,14 +5,10 @@ require "sinatra"
 require "pry"
 require "haml"
 require "json"
-require './image_runner_service'
+require './app/image_runner_service'
 
 set :bind, "0.0.0.0"
 configure { set :server, :puma }
-
-get "/pathfinding" do
-  erb :pathfinding
-end
 
 post "/submit" do
   content_type :json
@@ -22,12 +18,4 @@ post "/submit" do
   output = ImageRunnerService.new(params).run
 
   {"output": output}.to_json
-end
-
-post "/upload" do
-  params["text"]= params["myfile"][:tempfile].read
-
-  output = ImageRunnerService.new(params).run
-
-  erb :output, :locals => {"output": output}
 end
