@@ -22,19 +22,21 @@ module V2
 
       create_algo_file
       create_challenge_file
-      create_image
+      res = create_image
 
 
-      #cleanup_build_run_dir
+      cleanup_build_run_dir
 
-      #result
+      res
     end
 
     private
 
-    #def cleanup_build_run_dir
-    #FileUtils.remove_dir(build_run)
-    #end
+    def cleanup_build_run_dir
+      FileUtils.remove_dir(build_run)
+      run_command(container, "rm -rf #{build_tar}")
+      run_command(container, "rm -rf #{run_dir}")
+    end
 
     def create_build_run
       @build_run = "builds/" + docker_image + "-" + extension
@@ -68,27 +70,28 @@ module V2
     end
 
     def create_image
-      container = Docker::Container.get(docker_image)
-
-      build_dir = "/usr/ruby-test-runner/builds/#{extension}"
-      run_dir = "/usr/ruby-test-runner/#{build_run}"
+      @container = Docker::Container.get(docker_image)
+      @build_tar = "/usr/ruby-test-runner/builds/#{extension}"
+      @run_dir = "/usr/ruby-test-runner/#{build_run}"
 
       # Send current ruby+challenge.json to the docker container
       container.archive_in("./#{build_run}/", "/usr/ruby-test-runner/builds/")
       # Create the build_dir
-      run_command(container, "mkdir #{build_dir}", wait: 2)
+      run_command(container, "mkdir #{build_tar}", wait: 2)
       # Extract the files in the build dir
-      run_command(container, "tar -C #{build_dir} -xvf #{run_dir}")
+      run_command(container, "tar -C #{build_tar} -xvf #{run_dir}")
       # Run the ruby test interpreter
       run_command(container, "FOLDER=#{extension} ruby /usr/ruby-test-runner/app/wrapper.rb", wait: TIMEOUT_EXECUTION)
       # Capture the results of the test
-      res = run_command(container, "cat #{run_dir}/output.json", tty:true, stdout: true)
+      res = run_command(container, "cat #{build_tar}/output.json", tty:true, stdout: true)
 
+      puts res
       output = JSON.parse(res[0][0])
       output
     end
 
-    attr_reader :problem, :language, :text, :docker_image, :build_run, :extension, :challenge
+    attr_reader :problem, :language, :text, :docker_image,
+                :build_run, :extension, :challenge, :container, :build_tar, :run_dir
     def time_function(&block)
       before = Time.now
       yield
