@@ -3,6 +3,8 @@ require 'zlib'
 require 'fileutils'
 
 module V2
+  TIMEOUT_EXECUTION = 1
+
   class ImageRunnerService
     def initialize(params)
       @text = params["text"]
@@ -68,34 +70,19 @@ module V2
     def create_image
       container = Docker::Container.get(docker_image)
 
-      container.archive_in("./#{build_run}/", "/usr/ruby-test-runner/builds/")
-
       build_dir = "/usr/ruby-test-runner/builds/#{extension}"
       run_dir = "/usr/ruby-test-runner/#{build_run}"
 
-      run_command(
-        container,
-        "mkdir #{build_dir}",
-        wait: 2
-      )
-
-      run_command(
-        container,
-        "tar -C #{build_dir} -xvf #{run_dir}",
-        wait: 2, tty: true
-      )
-
-      run_command(
-        container,
-        "FOLDER=#{extension} ruby /usr/ruby-test-runner/app/wrapper.rb",
-        wait: 10, tty:true
-      )
-
-      res = run_command(
-        container,
-        "cat /usr/ruby-test-runner/builds/#{extension}/output.json",
-        wait: 10, tty:true, stdout: true
-      )
+      # Send current ruby+challenge.json to the docker container
+      container.archive_in("./#{build_run}/", "/usr/ruby-test-runner/builds/")
+      # Create the build_dir
+      run_command(container, "mkdir #{build_dir}", wait: 2)
+      # Extract the files in the build dir
+      run_command(container, "tar -C #{build_dir} -xvf #{run_dir}")
+      # Run the ruby test interpreter
+      run_command(container, "FOLDER=#{extension} ruby /usr/ruby-test-runner/app/wrapper.rb", wait: TIMEOUT_EXECUTION)
+      # Capture the results of the test
+      res = run_command(container, "cat #{run_dir}/output.json", tty:true, stdout: true)
 
       output = JSON.parse(res[0][0])
       output
