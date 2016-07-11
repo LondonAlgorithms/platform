@@ -23,12 +23,12 @@ module V2
       create_image
 
 
-      cleanup_build_run_dir
+      #cleanup_build_run_dir
 
       #result
     end
 
-    #private
+    private
 
     #def cleanup_build_run_dir
     #FileUtils.remove_dir(build_run)
@@ -60,41 +60,46 @@ module V2
       "algo.#{hash[language]}"
     end
 
+    def run_command(container, command, opts = {})
+      command_arr = ["bash", "-c", command]
+      container.exec(command_arr, opts)
+    end
 
     def create_image
       container = Docker::Container.get(docker_image)
 
       container.archive_in("./#{build_run}/", "/usr/ruby-test-runner/builds/")
-      puts extension
 
-      command = ["bash", "-c", "mkdir /usr/ruby-test-runner/builds/#{extension}"]
-      res = container.exec(command, wait: 2)
-      puts res
-      res
+      build_dir = "/usr/ruby-test-runner/builds/#{extension}"
+      run_dir = "/usr/ruby-test-runner/#{build_run}"
 
-      command = ["bash", "-c", "tar -C /usr/ruby-test-runner/builds/#{extension} -xvf /usr/ruby-test-runner/#{build_run}"]
-      res = container.exec(command, wait: 2, tty:true)
-      puts res
-      res
+      run_command(
+        container,
+        "mkdir #{build_dir}",
+        wait: 2
+      )
 
-      command = [
-        "bash", "-c",
-        "FOLDER=#{extension} ruby /usr/ruby-test-runner/app/wrapper.rb"]
-      container.exec(command, wait: 10, tty:true)# { |stream, chunk| puts "#{stream}: #{chunk}" }
-      output = []
-      command = [
-        "bash", "-c",
-        "cat /usr/ruby-test-runner/builds/#{extension}/output.json"]
+      run_command(
+        container,
+        "tar -C #{build_dir} -xvf #{run_dir}",
+        wait: 2, tty: true
+      )
 
-      res = container.exec(command, wait: 10, tty:true, stdout: true)
+      run_command(
+        container,
+        "FOLDER=#{extension} ruby /usr/ruby-test-runner/app/wrapper.rb",
+        wait: 10, tty:true
+      )
+
+      res = run_command(
+        container,
+        "cat /usr/ruby-test-runner/builds/#{extension}/output.json",
+        wait: 10, tty:true, stdout: true
+      )
 
       output = JSON.parse(res[0][0])
-      File.write("test", output)
-      puts output
       output
-
     end
-    private
 
     attr_reader :problem, :language, :text, :docker_image, :build_run, :extension, :challenge
     def time_function(&block)
